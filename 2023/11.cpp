@@ -1,110 +1,52 @@
 #include <iostream>
-#include <map>
-#include <deque>
-#include <unordered_map>
-#include <unordered_set>
 #include <string>
-#include <queue>
 using namespace std;
 using ll = long long;
 
-unordered_set<int> emptyCol, emptyRow;
+vector<string> grid;
+int m, n;
+vector<int> cols, rows;
+vector<pair<int, int>> galaxies;
 
-void getEmpty(vector<string> &grid)
+void getEmpty()
 {
-    int m = grid.size();
-    int n = grid[0].size();
-    vector<string> ans;
-    for (int j = 0; j < n; j++)
-    {
-        int inter = 0;
-        for (int i = 0; i < m; i++)
-        {
-            if (grid[i][j] == '#')
-                inter++;
-        }
-        if (inter == 0)
-            emptyCol.insert(j);
-    }
-    for (int i = 0; i < m; i++)
-    {
-        int inter = 0;
-        for (int j = 0; j < n; j++)
-        {
-            if (grid[i][j] == '#')
-                inter++;
-        }
-        if (inter == 0)
-            emptyRow.insert(i);
-    }
-}
-vector<string> expand(vector<string> &grid)
-{
-    int m = grid.size();
-    int n = grid[0].size();
-    vector<string> ans;
-
-    for (int i = 0; i < m; i++)
-    {
-        string inter = "";
-        for (int j = 0; j < n; j++)
-        {
-            inter += grid[i][j];
-            if (emptyCol.count(j))
-            {
-                inter += '.';
-            }
-        }
-        ans.push_back(inter);
-        if (emptyRow.count(i))
-        {
-            ans.push_back(string(n + emptyCol.size(), '.'));
-        }
-    }
-    cout << ans.size() << '\n';
-    return ans;
-}
-
-vector<pair<int, int>> d4{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-ll getD(vector<string> &grid, ll mult)
-{
-
-    int m = grid.size(), n = grid[0].size();
-    vector<pair<int, int>> s;
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
         {
             if (grid[i][j] == '#')
             {
-                s.push_back({i, j});
+                galaxies.push_back({i, j});
+                rows[i]++;
+                cols[j]++;
             }
         }
     }
+}
+
+ll getD(ll mult)
+{
     ll ans = 0;
-    int count = 0;
-    for (int i = 0; i < s.size(); i++)
+    for (int i = 0; i < galaxies.size(); i++)
     {
-        queue<pair<int, int>> q;
-        q.push(s[i]);
-        vector<vector<ll>> d(m, vector<ll>(n, -1));
-        d[s[i].first][s[i].second] = 0;
-        while (q.size())
+        auto &[ix, iy] = galaxies[i];
+        for (int j = i + 1; j < galaxies.size(); j++)
         {
-            auto [i, j] = q.front();
-            q.pop();
-            for (auto &[di, dj] : d4)
+            auto &[jx, jy] = galaxies[j];
+            int lx = min(ix, jx);
+            int hx = max(ix, jx);
+            int ly = min(iy, jy);
+            int hy = max(iy, jy);
+            int inter = 0;
+            for (int k = lx; k <= hx; k++)
             {
-                if (0 <= i + di && i + di < m && 0 <= j + dj && j + dj < n && d[i + di][j + dj] == -1)
-                {
-                    d[i + di][j + dj] = d[i][j] + emptyRow.count(i + di) + emptyCol.count(j + dj);
-                    q.push({i + di, j + dj});
-                }
+                inter += rows[k] == 0;
             }
-        }
-        for (auto &[ox, oy] : s)
-        {
-            ans += d[ox][oy] * (mult - 1) + llabs(s[i].first - ox) + llabs(s[i].second - oy);
+            for (int k = ly; k <= hy; k++)
+            {
+                inter += cols[k] == 0;
+            }
+            ans += inter * (mult - 1) + hx - lx + hy - ly;
         }
     }
     return ans;
@@ -113,19 +55,15 @@ ll getD(vector<string> &grid, ll mult)
 int main()
 {
     string line;
-    vector<string> grid;
-    cout << "HERE\n";
     while (getline(cin, line))
     {
         grid.push_back(line);
     }
-    getEmpty(grid);
-    // grid = expand(grid);
-
-    for (auto &x : grid)
-    {
-        cout << x << '\n';
-    }
-    cout << getD(grid, 1000000) / 2;
+    m = grid.size();
+    n = grid[0].size();
+    rows.assign(m, 0);
+    cols.assign(n, 0);
+    getEmpty();
+    cout << getD(1000000);
     return 0;
 }

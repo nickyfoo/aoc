@@ -25,6 +25,36 @@ pair<ll,ll> parse(string&color){
     return {color[7]-'0', res};
 }
 
+void process3(){
+
+    string line;
+    vector<pair<ll,ll>> pos;
+    pair<ll,ll> p = {0,0};
+    pos.push_back(p);
+    ll peri = 0;
+    while(getline(cin,line)){
+        char c; int len; string color;
+        stringstream ss(line);
+        ss >> c >> len >> color;
+        auto [dir,dist] = parse(color);
+        p.first += d4[dir].first * dist;
+        p.second += d4[dir].second * dist;
+        pos.push_back(p);
+        peri += dist;
+    }
+
+    for(auto&[a,b]:pos) cout << a << ' ' << b << '\n';
+    ll shoelace = 0;
+    for(int i=1; i<pos.size(); i++){
+        auto&[a,b] = pos[i-1];
+        auto&[c,d]=pos[i];
+        shoelace += pos[i-1].first*pos[i].second;
+        shoelace -= pos[i-1].second*pos[i].first;
+    }
+
+    cout << peri/2 + llabs(shoelace)/2 + 1 << '\n';
+}
+
 void process2(){
     string line;
 
@@ -83,9 +113,8 @@ void process2(){
         }
     }
 
-    cout << ans << '\n';
 
-    // remove the y overlaps
+//     remove the y overlaps
     for(int i=1; i<yOverlaps.size(); i++){
         vector<ll> prev = yOverlaps[i-1];
         vector<ll> curr = yOverlaps[i];
@@ -117,7 +146,7 @@ int main()
 {
 //    freopen("test.txt", "r", stdin);
     freopen("input.txt", "r", stdin);
-    process2();
+    process3();
     return 0;
 }
 

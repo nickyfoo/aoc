@@ -1,3 +1,4 @@
+#https://rosettacode.org/wiki/Chinese_remainder_theorem#Python
 from functools import reduce
 from operator import mul    
 
